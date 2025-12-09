@@ -95,18 +95,19 @@ app.post("/login", async (req, res) => {
 });
 
 // ROTA: ADICIONAR TRANSAÇÃO
-app.post("/transactions", async (req, res) => {
-  const { user_id, title, value, type } = req.body;
+app.post('/transactions', async (req, res) => {
+  // Agora recebemos 'date' também
+  const { user_id, title, value, type, date } = req.body;
 
   try {
     const newTransaction = await pool.query(
-      "INSERT INTO transactions (user_id, title, value, type) VALUES ($1, $2, $3, $4) RETURNING *",
-      [user_id, title, value, type]
+      'INSERT INTO transactions (user_id, title, value, type, date) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [user_id, title, value, type, date]
     );
     res.json(newTransaction.rows[0]);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Erro ao salvar transação");
+    res.status(500).send('Erro ao salvar transação');
   }
 });
 
