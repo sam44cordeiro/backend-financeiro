@@ -94,6 +94,38 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// ROTA: ADICIONAR TRANSAÇÃO
+app.post("/transactions", async (req, res) => {
+  const { user_id, title, value, type } = req.body;
+
+  try {
+    const newTransaction = await pool.query(
+      "INSERT INTO transactions (user_id, title, value, type) VALUES ($1, $2, $3, $4) RETURNING *",
+      [user_id, title, value, type]
+    );
+    res.json(newTransaction.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Erro ao salvar transação");
+  }
+});
+
+// ROTA: PEGAR TRANSAÇÕES DE UM USUÁRIO
+app.get("/transactions/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const allTransactions = await pool.query(
+      "SELECT * FROM transactions WHERE user_id = $1 ORDER BY created_at DESC",
+      [userId]
+    );
+    res.json(allTransactions.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Erro ao buscar transações");
+  }
+});
+
 // --- CORREÇÃO IMPORTANTE AQUI EMBAIXO ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
